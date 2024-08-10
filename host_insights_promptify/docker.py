@@ -18,14 +18,22 @@ def collect_docker_info():
         # Collect running containers with detailed info
         containers = client.containers.list()
         for container in containers:
-            container_stats = container.stats(stream=False)
+            try:
+                container_stats = container.stats(stream=False)
+                cpu_usage = container_stats["cpu_stats"]["cpu_usage"]["total_usage"]
+                memory_usage = container_stats["memory_stats"]["usage"]
+            except KeyError:
+                # Handle the case where stats might not be available or complete
+                cpu_usage = "N/A"
+                memory_usage = "N/A"
+
             docker_info["containers"].append({
                 "name": container.name,
                 "image": container.image.tags,
                 "status": container.status,
                 "ports": container.ports,
-                "cpu_usage": container_stats["cpu_stats"]["cpu_usage"]["total_usage"],
-                "memory_usage": container_stats["memory_stats"]["usage"],
+                "cpu_usage": cpu_usage,
+                "memory_usage": memory_usage,
                 "env": container.attrs["Config"]["Env"],
                 "health_status": container.attrs["State"].get("Health", {}).get("Status", "No health check"),
                 "restart_policy": container.attrs["HostConfig"]["RestartPolicy"]["Name"],
@@ -59,5 +67,7 @@ def collect_docker_info():
 
     except docker.errors.APIError as e:
         docker_info["error"] = f"Error collecting Docker information: {str(e)}"
+    except Exception as e:
+        docker_info["error"] = f"Unexpected error: {str(e)}"
 
     return docker_info

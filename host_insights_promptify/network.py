@@ -45,17 +45,15 @@ def collect_network_info():
             network_info["interfaces"].append(interface_info)
 
         # Collect routing table
-        routes = psutil.net_if_stats().items()
-        for route in psutil.net_if_stats().keys():
-            route_info = {
-                "destination": route,
-                "gateway": psutil.net_if_addrs()[route][0].address,
-                "interface": psutil.net_if_stats()[route].isup,
-                "netmask": psutil.net_if_addrs()[route][0].netmask,
-                "flags": "U" if psutil.net_if_stats()[route].isup else "",
-                "metric": psutil.net_if_stats()[route].speed
-            }
-            network_info["routing_table"].append(route_info)
+        if platform.system() == "Linux":
+            result = subprocess.run(['ip', 'route'], capture_output=True, text=True)
+            network_info["routing_table"] = result.stdout.splitlines()
+        elif platform.system() == "Darwin":  # macOS
+            result = subprocess.run(['netstat', '-rn'], capture_output=True, text=True)
+            network_info["routing_table"] = result.stdout.splitlines()
+        elif platform.system() == "Windows":
+            result = subprocess.run(['route', 'print'], capture_output=True, text=True)
+            network_info["routing_table"] = result.stdout.splitlines()
 
         # Collect active connections
         connections = psutil.net_connections()
@@ -99,14 +97,43 @@ def collect_network_info():
                         network_info["dns"]["search_domains"] = []
                     network_info["dns"]["search_domains"].append(line.split()[-1])
 
-        # Collect firewall rules (assuming iptables on Linux)
+        elif platform.system() == "Windows":
+            result = subprocess.run(['ipconfig', '/all'], capture_output=True, text=True)
+            dns_output = result.stdout.splitlines()
+            network_info["dns"]["primary"] = None
+            network_info["dns"]["secondary"] = None
+            for line in dns_output:
+                if "DNS Servers" in line:
+                    dns_servers = line.split(":")[1].strip().split()
+                    if dns_servers:
+                        network_info["dns"]["primary"] = dns_servers[0]
+                        if len(dns_servers) > 1:
+                            network_info["dns"]["secondary"] = dns_servers[1]
+
+        # Collect firewall rules
         if platform.system() == "Linux":
-            result = subprocess.run(['iptables', '-L'], capture_output=True, text=True)
-            network_info["firewall_rules"] = result.stdout
+            try:
+                # Check if UFW is active and collect its rules
+                ufw_status = subprocess.run(['ufw', 'status'], capture_output=True, text=True)
+                if "Status: active" in ufw_status.stdout:
+                    network_info["firewall_rules"] = subprocess.run(['ufw', 'status', 'numbered'], capture_output=True, text=True).stdout
+                else:
+                    # Fallback to iptables or nftables if UFW is not active
+                    result = subprocess.run(['iptables', '-L'], capture_output=True, text=True)
+                    network_info["firewall_rules"] = result.stdout
+            except FileNotFoundError:
+                try:
+                    result = subprocess.run(['nft', 'list', 'ruleset'], capture_output=True, text=True)
+                    network_info["firewall_rules"] = result.stdout
+                except FileNotFoundError:
+                    network_info["firewall_rules"] = "Neither UFW, iptables, nor nftables found"
 
         elif platform.system() == "Darwin":  # macOS
-            result = subprocess.run(['sudo', 'pfctl', '-sr'], capture_output=True, text=True)
-            network_info["firewall_rules"] = result.stdout
+            try:
+                result = subprocess.run(['pfctl', '-sr'], capture_output=True, text=True)
+                network_info["firewall_rules"] = result.stdout
+            except subprocess.CalledProcessError:
+                network_info["firewall_rules"] = "pfctl command requires elevated privileges"
 
     except Exception as e:
         network_info["error"] = f"Error collecting network information: {str(e)}"

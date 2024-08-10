@@ -125,7 +125,7 @@ def format_prompt(system_info, network_info, docker_info, services_info):
             prompt.append(f"  - Driver: {network.get('driver', 'N/A')}")
             prompt.append(f"  - Subnet: {network.get('subnet', 'N/A')}")
             prompt.append(f"  - Gateway: {network.get('gateway', 'N/A')}")
-            prompt.append(f"  - Connected Containers: {', '.join([container.name for container in network.get('containers', [])])}")
+            prompt.append(f"  - Connected Containers: {', '.join([container for container in network.get('containers', [])])}")
             prompt.append("")
         prompt.append("Assess the Docker network configurations. Provide recommendations if there are any security or performance concerns.")
         prompt.append("")
@@ -137,7 +137,7 @@ def format_prompt(system_info, network_info, docker_info, services_info):
             prompt.append(f"  - Driver: {volume.get('driver', 'N/A')}")
             prompt.append(f"  - Labels: {volume.get('labels', 'N/A')}")
             prompt.append("")
-        prompt.append("Review Docker volumes. If there are storage or access issues,offer potential solutions.")
+        prompt.append("Review Docker volumes. If there are storage or access issues, offer potential solutions.")
         prompt.append("")
 
     # Services Information
@@ -173,4 +173,4 @@ def save_prompt_to_file(prompt, file_path="host_insights_prompt.txt"):
             file.write(prompt)
         print(f"Prompt saved to {file_path}")
     except Exception as e:
-        print(f"Error saving prompt to file: {str(e)}")
+        print(f"Error saving prompt to {file_path}: {str(e)}")

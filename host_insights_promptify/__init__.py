@@ -14,7 +14,11 @@ Modules:
 - network: Manages network interface and routing details.
 - docker: Collects data on Docker containers, networks, and volumes.
 - services: Retrieves information about running services on the host.
-- prompt_formatter: Processes and formats the gathered data into an AI-ready prompt.
+- promptify: Processes and formats the gathered data into an AI-ready prompt.
+
+Core Function:
+--------------
+- gather_all_insights: Collects all insights and formats them into a single AI-ready prompt.
 """
 
 from .system import collect_system_info
@@ -29,6 +33,7 @@ __all__ = [
     "collect_docker_info",
     "collect_services_info",
     "format_prompt",
+    "gather_all_insights",
 ]
 
 __version__ = "0.1.0"
