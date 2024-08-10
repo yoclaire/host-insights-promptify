@@ -21,7 +21,7 @@ from .system import collect_system_info
 from .network import collect_network_info
 from .docker import collect_docker_info
 from .services import collect_services_info
-from .prompt_formatter import format_prompt
+from .promptify import format_prompt
 
 __all__ = [
     "collect_system_info",
