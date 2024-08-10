@@ -1,5 +1,3 @@
-# host-insights-promptify
- 
 # Host-Insights-Promptify
 
 Host-Insights-Promptify is a cross-platform command-line tool designed to gather detailed insights about a host system. Whether you're troubleshooting, optimizing, or preparing for technical support, Host-Insights-Promptify provides comprehensive information to help you understand your system's state and environment.
