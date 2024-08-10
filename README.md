@@ -32,7 +32,7 @@ Host-Insights-Promptify is a cross-platform command-line tool designed to gather
 
 1. **Clone the Repository**:
     ```bash
-    git clone https://github.com/yourusername/host-insights-promptify.git
+    git clone https://github.com/yoclaire/host-insights-promptify.git
     cd host-insights-promptify
     ```
 
@@ -114,7 +114,7 @@ We welcome contributions to Host-Insights-Promptify! Whether you're fixing bugs,
 1. **Fork the Repository**: Click the "Fork" button at the top-right of the repository page.
 2. **Clone Your Fork**:
     ```bash
-    git clone https://github.com/yoclaire/host-insights-promptify.git
+    git clone https://github.com/[yourusername]/host-insights-promptify.git
     ```
 3. **Create a New Branch**:
     ```bash
