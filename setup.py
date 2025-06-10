@@ -14,7 +14,7 @@ setup(
     install_requires=[
         "docker==7.1.0",
         "psutil==6.0.0",
-        "requests==2.32.3",
+        "requests==2.32.4",
         "urllib3==2.2.2",
         "charset-normalizer==3.3.2",
         "idna==3.7",
